@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-@Repository
 public class MockHardwareRepository implements HardwareRepository{
 
     private final List<Hardware> MOCKED_HARDWARE = new ArrayList<>(List.of(

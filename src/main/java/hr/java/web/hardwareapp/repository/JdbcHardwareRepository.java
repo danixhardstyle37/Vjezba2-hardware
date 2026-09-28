@@ -1,80 +1,158 @@
 package hr.java.web.hardwareapp.repository;
 
+import com.mysql.cj.jdbc.MysqlDataSource;
 import hr.java.web.hardwareapp.domain.Hardware;
 import hr.java.web.hardwareapp.domain.Type;
-import org.springframework.context.annotation.Primary;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Repository
-@Primary
 public class JdbcHardwareRepository implements HardwareRepository {
 
-    private final JdbcTemplate jdbcTemplate;
+    private final DataSource dataSource;
 
-    public JdbcHardwareRepository(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
+    public JdbcHardwareRepository() {
+        this.dataSource = createDataSource();
+    }
+
+    private DataSource createDataSource() {
+        MysqlDataSource ds = new MysqlDataSource();
+
+        ds.setServerName("localhost");
+        ds.setPortNumber(3307);
+        ds.setUser("root");
+        ds.setDatabaseName("hardwareapp");
+
+        return ds;
     }
 
     @Override
     public List<Hardware> findAll() {
-        return jdbcTemplate.query("SELECT id, name, type, code, stock, price FROM hardware", this::mapRow);
+        List<Hardware> hardwareList = new ArrayList<>();
+
+        String sql = "SELECT Name, Type, Code, Stock, Price FROM Hardware";
+
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement stmt = connection.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                Hardware hardware = new Hardware(
+                        rs.getString("Name"),
+                        Type.valueOf(rs.getString("Type")),
+                        rs.getString("Code"),
+                        rs.getInt("Stock"),
+                        rs.getBigDecimal("Price")
+                );
+
+                hardwareList.add(hardware);
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Dogodila se greska pri dohvaćanju hardvera.", e);
+        }
+
+        return hardwareList;
     }
 
     @Override
     public Optional<Hardware> findByCode(String code) {
-        return jdbcTemplate.query("SELECT id, name, type, code, stock, price FROM hardware WHERE code = ?", this::mapRow, code).stream().findFirst();
+        String sql = "SELECT Name, Type, Code, Stock, Price FROM Hardware WHERE Code = ?";
+
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement stmt = connection.prepareStatement(sql)) {
+
+            stmt.setString(1, code);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    Hardware hardware = new Hardware(
+                            rs.getString("Name"),
+                            Type.valueOf(rs.getString("Type")),
+                            rs.getString("Code"),
+                            rs.getInt("Stock"),
+                            rs.getBigDecimal("Price")
+                    );
+
+                    return Optional.of(hardware);
+                }
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Dogodila se greska pri dohvaćanju hardvera.", e);
+        }
+
+        return Optional.empty();
     }
 
     @Override
     public void save(Hardware hardware) {
-        jdbcTemplate.update(
-                "INSERT INTO hardware (name, type, code, stock, price)     VALUES (?, ?, ?, ?, ?)",
-                hardware.getName(),
-                hardware.getType().name(),
-                hardware.getCode(),
-                hardware.getStock(),
-                hardware.getPrice()
-        );
+        String sql = "INSERT INTO Hardware (Name, Type, Code, Stock, Price) VALUES (?, ?, ?, ?, ?)";
+
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement stmt = connection.prepareStatement(sql)) {
+
+            stmt.setString(1, hardware.getName());
+            stmt.setString(2, hardware.getType().name());
+            stmt.setString(3, hardware.getCode());
+            stmt.setInt(4, (int) hardware.getStock());
+            stmt.setBigDecimal(5, hardware.getPrice());
+
+            stmt.executeUpdate();
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Dogodila se greska pri spremanju hardvera.", e);
+        }
     }
 
     @Override
     public Optional<Hardware> update(Hardware hardware) {
+        String sql = "UPDATE Hardware SET Name = ?, Type = ?, Stock = ?, Price = ? WHERE Code = ?";
 
-        int rowsUpdated = jdbcTemplate.update(
-                "UPDATE hardware SET name = ?, type = ?, stock = ?, price = ? WHERE code = ? ",
-                hardware.getName(),
-                hardware.getType().name(),
-                hardware.getStock(),
-                hardware.getPrice(),
-                hardware.getCode()
-        );
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement stmt = connection.prepareStatement(sql)) {
 
-        if (rowsUpdated == 0) {
-            return Optional.empty();
+            stmt.setString(1, hardware.getName());
+            stmt.setString(2, hardware.getType().name());
+            stmt.setInt(3, (int) hardware.getStock());
+            stmt.setBigDecimal(4, hardware.getPrice());
+            stmt.setString(5, hardware.getCode());
+
+            int brojPromijenjenihRedaka = stmt.executeUpdate();
+
+            if (brojPromijenjenihRedaka > 0) {
+                return findByCode(hardware.getCode());
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Dogodila se greska pri izmjeni hardvera.", e);
         }
 
-        return findByCode(hardware.getCode());
+        return Optional.empty();
     }
 
     @Override
     public boolean deleteByCode(String code) {
-        int rowsDeleted = jdbcTemplate.update("DELETE FROM hardware WHERE code = ?", code);
+        String sql = "DELETE FROM Hardware WHERE Code = ?";
 
-        return rowsDeleted > 0;
-    }
+        try (Connection connection = dataSource.getConnection(); PreparedStatement stmt = connection.prepareStatement(sql)) {
 
-    private Hardware mapRow(java.sql.ResultSet rs, int rowNum) throws java.sql.SQLException {
-        return new Hardware(
-                rs.getLong("id"),
-                rs.getString("name"),
-                Type.valueOf(rs.getString("type")),
-                rs.getString("code"),
-                rs.getLong("stock"),
-                rs.getBigDecimal("price")
-        );
+            stmt.setString(1, code);
+
+            int brojObrisanihRedaka = stmt.executeUpdate();
+
+            return brojObrisanihRedaka > 0;
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Dogodila se greska pri brisanju hardvera.", e);
+        }
     }
 }

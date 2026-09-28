@@ -1,0 +1,37 @@
+DROP DATABASE IF EXISTS hardwareapp;
+CREATE DATABASE hardwareapp;
+
+USE hardwareapp;
+
+CREATE TABLE TYPE
+(
+    id INT PRIMARY KEY,
+    NAME VARCHAR(50) NOT NULL
+);
+
+CREATE TABLE Hardware
+(
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    NAME VARCHAR(100) NOT NULL,
+    TYPE VARCHAR(50) NOT NULL,
+    CODE VARCHAR(50) NOT NULL UNIQUE,
+    Stock INT NOT NULL,
+    Price DECIMAL(10, 2) NOT NULL
+);
+
+INSERT INTO TYPE (id, NAME)
+VALUES
+    (1, 'GPU'),
+    (2, 'CPU'),
+    (3, 'STORAGE'),
+    (4, 'RAM');
+
+INSERT INTO Hardware (NAME, TYPE, CODE, Stock, Price)
+VALUES
+    ('Asus TUF RTX 3080', 'GPU', '1234561', 0, 1599.00),
+    ('EVGA XC3 RTX 3070 Ti', 'GPU', '1234562', 0, 1299.00),
+    ('AMD Ryzen 5950X', 'CPU', '1234563', 0, 899.00),
+    ('Samsung 980 PRO SSD 1TB', 'STORAGE', '1234564', 0, 299.00),
+    ('Kingston FURY Beast DDR5 32GB', 'RAM', '1234565', 0, 699.00);
+
+SELECT * FROM Hardware;
