@@ -1,7 +1,6 @@
 package hr.java.web.hardwareapp.dto;
 
 import hr.java.web.hardwareapp.domain.Hardware;
-import hr.java.web.hardwareapp.domain.Type;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -15,7 +14,7 @@ public class HardwareDTO {
     private String name;
 
     @NotNull(message = "Type cannot be null")
-    private Type type;
+    private Long typeId;
 
     @NotBlank(message = "Code cannot be blank")
     private String code;
@@ -32,7 +31,7 @@ public class HardwareDTO {
 
     public HardwareDTO(Hardware hardware) {
         this.name = hardware.getName();
-        this.type = hardware.getType();
+        this.typeId = hardware.getType().getId();
         this.code = hardware.getCode();
         this.stock = hardware.getStock();
         this.price = hardware.getPrice();
@@ -46,8 +45,8 @@ public class HardwareDTO {
         return price;
     }
 
-    public Type getType() {
-        return type;
+    public Long getTypeId() {
+        return typeId;
     }
 
     public String getCode() {

@@ -15,8 +15,9 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public class JdbcHardwareRepository implements HardwareRepository {
+public class JdbcHardwareRepository { //implements HardwareRepository {
 
+    /*
     private final DataSource dataSource;
 
     public JdbcHardwareRepository() {
@@ -155,4 +156,5 @@ public class JdbcHardwareRepository implements HardwareRepository {
             throw new RuntimeException("Dogodila se greska pri brisanju hardvera.", e);
         }
     }
+    */
 }

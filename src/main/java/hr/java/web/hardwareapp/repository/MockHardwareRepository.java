@@ -10,8 +10,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-public class MockHardwareRepository implements HardwareRepository{
-
+public class MockHardwareRepository{ // implements HardwareRepository{
+/*
     private final List<Hardware> MOCKED_HARDWARE = new ArrayList<>(List.of(
             new Hardware("Asus TUF RTX 3080", Type.GPU, "1234561", 0, BigDecimal.valueOf(1599.00)),
             new Hardware("EVGA XC3 RTX 3070 Ti", Type.GPU, "1234562", 0, BigDecimal.valueOf(1299.00)),
@@ -59,4 +59,5 @@ public class MockHardwareRepository implements HardwareRepository{
     public boolean deleteByCode(String code) {
         return MOCKED_HARDWARE.removeIf(hardware -> Objects.equals(hardware.getCode(), code));
     }
+    */
 }

@@ -3,35 +3,36 @@ CREATE DATABASE hardwareapp;
 
 USE hardwareapp;
 
-CREATE TABLE TYPE
+CREATE TABLE Type
 (
-    id INT PRIMARY KEY,
-    NAME VARCHAR(50) NOT NULL
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(50) NOT NULL
 );
 
 CREATE TABLE Hardware
 (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    NAME VARCHAR(100) NOT NULL,
-    TYPE VARCHAR(50) NOT NULL,
-    CODE VARCHAR(50) NOT NULL UNIQUE,
-    Stock INT NOT NULL,
-    Price DECIMAL(10, 2) NOT NULL
+    name VARCHAR(100) NOT NULL,
+    code VARCHAR(50) NOT NULL UNIQUE,
+    stock INT NOT NULL,
+    price DECIMAL(10, 2) NOT NULL,
+    type_id INT NOT NULL,
+    FOREIGN KEY (type_id) REFERENCES Type(id)
 );
 
-INSERT INTO TYPE (id, NAME)
+INSERT INTO Type (name)
 VALUES
-    (1, 'GPU'),
-    (2, 'CPU'),
-    (3, 'STORAGE'),
-    (4, 'RAM');
+    ('CPU'),
+    ('GPU'),
+    ('MBO'),
+    ('RAM'),
+    ('STORAGE'),
+    ('OTHER');
 
-INSERT INTO Hardware (NAME, TYPE, CODE, Stock, Price)
+INSERT INTO Hardware (name, code, stock, price, type_id)
 VALUES
-    ('Asus TUF RTX 3080', 'GPU', '1234561', 0, 1599.00),
-    ('EVGA XC3 RTX 3070 Ti', 'GPU', '1234562', 0, 1299.00),
-    ('AMD Ryzen 5950X', 'CPU', '1234563', 0, 899.00),
-    ('Samsung 980 PRO SSD 1TB', 'STORAGE', '1234564', 0, 299.00),
-    ('Kingston FURY Beast DDR5 32GB', 'RAM', '1234565', 0, 699.00);
-
-SELECT * FROM Hardware;
+    ('Asus TUF RTX 3080', '1234561', 0, 1599.00, 2),
+    ('EVGA XC3 RTX 3070 Ti', '1234562', 0, 1299.00, 2),
+    ('AMD Ryzen 5950X', '1234563', 0, 899.00, 1),
+    ('Samsung 980 PRO SSD 1TB', '1234564', 0, 299.00, 5),
+    ('Kingston FURY Beast DDR5 32GB', '1234565', 0, 699.00, 4);
